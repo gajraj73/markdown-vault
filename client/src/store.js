@@ -86,8 +86,8 @@ const useStore = create((set, get) => ({
   darkMode: window.matchMedia('(prefers-color-scheme: dark)').matches,
   toggleDarkMode: () => set((s) => ({ darkMode: !s.darkMode })),
 
-  showPreview: true,
-  togglePreview: () => set((s) => ({ showPreview: !s.showPreview })),
+  showEditor: false,
+  toggleEditor: () => set((s) => ({ showEditor: !s.showEditor })),
 
   sidebarTab: 'files',
   setSidebarTab: (tab) => set({ sidebarTab: tab }),

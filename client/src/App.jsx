@@ -8,7 +8,7 @@ import SearchModal from './components/SearchModal';
 import Reader from './components/Reader';
 
 export default function App() {
-  const { darkMode, loadTree, loadMetadata, loadContinueReading, showPreview, currentFile, searchOpen, uploadFiles, readerMode } = useStore();
+  const { darkMode, loadTree, loadMetadata, loadContinueReading, showEditor, currentFile, searchOpen, uploadFiles, readerMode } = useStore();
   const [dropping, setDropping] = useState(false);
 
   useEffect(() => {
@@ -77,8 +77,8 @@ export default function App() {
         <div className="flex flex-1 overflow-hidden">
           {currentFile ? (
             <>
-              <Editor />
-              {showPreview && <Preview />}
+              {showEditor && <Editor />}
+              <Preview />
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center text-gray-400">

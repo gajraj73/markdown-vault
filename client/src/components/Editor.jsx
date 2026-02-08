@@ -6,7 +6,7 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import useStore from '../store';
 
 export default function Editor() {
-  const { content, setContent, dirty, darkMode, showPreview, currentFile } = useStore();
+  const { content, setContent, dirty, darkMode, currentFile } = useStore();
   const timerRef = useRef(null);
 
   const handleChange = useCallback(
@@ -28,11 +28,7 @@ export default function Editor() {
   }, [currentFile]);
 
   return (
-    <div
-      className={`flex-1 flex flex-col overflow-hidden ${
-        showPreview ? 'border-r border-gray-200 dark:border-gray-700' : ''
-      }`}
-    >
+    <div className="flex-1 flex flex-col overflow-hidden border-r border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs text-gray-500">
         <span>Editor</span>
         {dirty && <span className="text-yellow-600 dark:text-yellow-400">Unsaved</span>}

@@ -1,14 +1,14 @@
 import { useRef, useState } from 'react';
 import useStore from '../store';
-import { Search, Plus, Upload, Moon, Sun, Eye, EyeOff, Star, Tag, BookOpen } from 'lucide-react';
+import { Search, Plus, Upload, Moon, Sun, Pencil, PencilOff, Star, Tag, BookOpen } from 'lucide-react';
 
 export default function TopBar() {
   const {
     currentFile,
     darkMode,
     toggleDarkMode,
-    showPreview,
-    togglePreview,
+    showEditor,
+    toggleEditor,
     setSearchOpen,
     uploadFiles,
     createFile,
@@ -129,11 +129,11 @@ export default function TopBar() {
           <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1" />
 
           <button
-            onClick={togglePreview}
+            onClick={toggleEditor}
             className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            title={showPreview ? 'Hide preview' : 'Show preview'}
+            title={showEditor ? 'Hide editor' : 'Show editor'}
           >
-            {showPreview ? <EyeOff size={18} /> : <Eye size={18} />}
+            {showEditor ? <PencilOff size={18} /> : <Pencil size={18} />}
           </button>
 
           <button
