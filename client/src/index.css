@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Make CodeMirror fill its container */
+.cm-editor {
+  height: 100% !important;
+}
+
+.cm-editor .cm-scroller {
+  overflow: auto !important;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-500;
+}
+
+/* Prose dark mode overrides for code blocks */
+.dark .prose pre {
+  background-color: #22272e;
+}
+
+.dark .prose code {
+  color: #adbac7;
+}
+
+/* Drop zone indicator */
+.drop-active {
+  @apply ring-2 ring-blue-500 ring-inset;
+}
+
+/* Reader mode smooth scrolling */
+.reader-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Reader prose spacing for comfortable reading */
+.reader-prose p {
+  margin-bottom: 1.2em;
+}
+
+.reader-prose h1,
+.reader-prose h2,
+.reader-prose h3 {
+  margin-top: 2em;
+}
