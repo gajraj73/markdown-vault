@@ -3,6 +3,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import useStore from '../store';
+import HighlightPopup from './HighlightPopup';
+import { applyHighlightsToDOM, getSelectionInfo } from '../utils/highlights';
 import {
   X,
   Minus,
@@ -10,8 +12,6 @@ import {
   Sun,
   Moon,
   BookOpen,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 
 const THEMES = {
@@ -52,21 +52,33 @@ export default function Reader() {
     readerContent,
     readerTheme,
     readerFontSize,
+    readerHighlights,
     closeReader,
     setReaderTheme,
     setReaderFontSize,
     saveReadingProgress,
+    addHighlight,
+    removeHighlight,
   } = useStore();
 
   const scrollRef = useRef(null);
+  const contentRef = useRef(null);
   const saveTimerRef = useRef(null);
   const [progress, setProgress] = useState(0);
   const [showControls, setShowControls] = useState(true);
   const [initialScrollDone, setInitialScrollDone] = useState(false);
   const controlsTimerRef = useRef(null);
+  const [popup, setPopup] = useState(null);
 
   const theme = THEMES[readerTheme] || THEMES.dark;
   const fileName = readerFile?.split('/').pop()?.replace(/\.md$/, '') || '';
+
+  // Apply highlights after content renders
+  useEffect(() => {
+    if (contentRef.current) {
+      applyHighlightsToDOM(contentRef.current, readerHighlights);
+    }
+  }, [readerContent, readerHighlights]);
 
   // Restore scroll position on mount
   useEffect(() => {
@@ -97,6 +109,9 @@ export default function Reader() {
     saveTimerRef.current = setTimeout(() => {
       saveReadingProgress(pct);
     }, 500);
+
+    // Close popup on scroll
+    setPopup(null);
   }, [saveReadingProgress, initialScrollDone]);
 
   // Save progress on close
@@ -152,6 +167,49 @@ export default function Reader() {
     const idx = keys.indexOf(readerTheme);
     setReaderTheme(keys[(idx + 1) % keys.length]);
   };
+
+  // Highlight handlers
+  const handleMouseUp = useCallback(() => {
+    if (!contentRef.current) return;
+    setTimeout(() => {
+      const info = getSelectionInfo(contentRef.current);
+      if (info) {
+        setPopup({ mode: 'add', position: info.rect, text: info.text, occurrenceIndex: info.occurrenceIndex });
+      }
+    }, 10);
+  }, []);
+
+  const handleContentClick = useCallback((e) => {
+    const mark = e.target.closest('mark[data-highlight-id]');
+    if (mark) {
+      const rect = mark.getBoundingClientRect();
+      setPopup({
+        mode: 'remove',
+        position: { x: rect.left + rect.width / 2, y: rect.top },
+        highlightId: mark.dataset.highlightId,
+      });
+      e.stopPropagation();
+    }
+  }, []);
+
+  const handleColorSelect = useCallback((color) => {
+    if (!popup || !readerFile) return;
+    const highlight = {
+      id: crypto.randomUUID(),
+      text: popup.text,
+      color,
+      occurrenceIndex: popup.occurrenceIndex,
+    };
+    addHighlight(readerFile, highlight, true);
+    window.getSelection()?.removeAllRanges();
+    setPopup(null);
+  }, [popup, readerFile, addHighlight]);
+
+  const handleRemoveHighlight = useCallback(() => {
+    if (!popup || !readerFile) return;
+    removeHighlight(readerFile, popup.highlightId, true);
+    setPopup(null);
+  }, [popup, readerFile, removeHighlight]);
 
   return (
     <div
@@ -228,8 +286,11 @@ export default function Reader() {
       >
         <div className="max-w-[700px] mx-auto py-12 pb-32">
           <div
+            ref={contentRef}
             className={`prose ${theme.prose} max-w-none prose-pre:bg-[#22272e] prose-pre:text-[#adbac7] prose-img:rounded-lg prose-headings:font-semibold`}
             style={{ fontSize: `${readerFontSize}px`, lineHeight: 1.8 }}
+            onMouseUp={handleMouseUp}
+            onClick={handleContentClick}
           >
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
@@ -257,6 +318,14 @@ export default function Reader() {
         <span className="mx-3">|</span>
         <span>{Math.round(progress * 100)}%</span>
       </div>
+
+      <HighlightPopup
+        position={popup?.position}
+        mode={popup?.mode}
+        onSelectColor={handleColorSelect}
+        onRemove={handleRemoveHighlight}
+        onClose={() => setPopup(null)}
+      />
     </div>
   );
 }

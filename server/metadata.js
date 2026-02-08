@@ -15,7 +15,7 @@ class Metadata {
     } catch (e) {
       console.error('Error loading metadata:', e);
     }
-    return { tags: {}, favorites: [], recent: [], readingProgress: {} };
+    return { tags: {}, favorites: [], recent: [], readingProgress: {}, highlights: {} };
   }
 
   save() {
@@ -74,6 +74,21 @@ class Metadata {
     this.save();
   }
 
+  getHighlights(filePath) {
+    if (!this.data.highlights) this.data.highlights = {};
+    return this.data.highlights[filePath] || [];
+  }
+
+  setHighlights(filePath, highlights) {
+    if (!this.data.highlights) this.data.highlights = {};
+    if (!highlights || highlights.length === 0) {
+      delete this.data.highlights[filePath];
+    } else {
+      this.data.highlights[filePath] = highlights;
+    }
+    this.save();
+  }
+
   getContinueReading() {
     if (!this.data.readingProgress) return [];
     return Object.entries(this.data.readingProgress)
@@ -91,6 +106,10 @@ class Metadata {
       this.data.readingProgress[newPath] = this.data.readingProgress[oldPath];
       delete this.data.readingProgress[oldPath];
     }
+    if (this.data.highlights?.[oldPath]) {
+      this.data.highlights[newPath] = this.data.highlights[oldPath];
+      delete this.data.highlights[oldPath];
+    }
     this.data.favorites = this.data.favorites.map(p => p === oldPath ? newPath : p);
     this.data.recent = this.data.recent.map(p => p === oldPath ? newPath : p);
     this.save();
@@ -99,6 +118,7 @@ class Metadata {
   deletePath(filePath) {
     delete this.data.tags[filePath];
     delete this.data.readingProgress?.[filePath];
+    if (this.data.highlights) delete this.data.highlights[filePath];
     this.data.favorites = this.data.favorites.filter(p => p !== filePath);
     this.data.recent = this.data.recent.filter(p => p !== filePath);
     this.save();

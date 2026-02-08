@@ -67,6 +67,12 @@ export const saveProgress = (path, scrollPercent) =>
 export const getProgress = (path) =>
   request(`/metadata/progress?path=${encodeURIComponent(path)}`);
 
+export const saveHighlights = (path, highlights) =>
+  request('/metadata/highlights', {
+    method: 'PUT',
+    body: JSON.stringify({ path, highlights }),
+  });
+
 export const getContinueReading = () => request('/metadata/continue-reading');
 
 export async function uploadFiles(files, folder = '') {

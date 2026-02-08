@@ -112,6 +112,7 @@ router.get('/file', (req, res) => {
       content,
       tags: meta.getTags(filePath),
       favorite: meta.isFavorite(filePath),
+      highlights: meta.getHighlights(filePath),
     });
   } catch {
     res.status(404).json({ error: 'File not found' });
@@ -264,6 +265,13 @@ router.get('/metadata/progress', (req, res) => {
   if (!filePath) return res.status(400).json({ error: 'Path required' });
   const progress = getMetadata(req.vaultDir).getProgress(filePath);
   res.json(progress || { scrollPercent: 0 });
+});
+
+router.put('/metadata/highlights', (req, res) => {
+  const { path: filePath, highlights } = req.body;
+  if (!filePath) return res.status(400).json({ error: 'Path required' });
+  getMetadata(req.vaultDir).setHighlights(filePath, highlights || []);
+  res.json({ success: true });
 });
 
 router.get('/metadata/continue-reading', (req, res) => {

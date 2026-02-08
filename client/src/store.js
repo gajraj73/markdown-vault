@@ -31,6 +31,7 @@ const useStore = create((set, get) => ({
         dirty: false,
         currentTags: data.tags || [],
         currentFavorite: data.favorite || false,
+        currentHighlights: data.highlights || [],
       });
     } catch (err) {
       console.error('Failed to open file:', err);
@@ -56,6 +57,7 @@ const useStore = create((set, get) => ({
   metadata: { tags: {}, favorites: [], recent: [] },
   currentTags: [],
   currentFavorite: false,
+  currentHighlights: [],
 
   loadMetadata: async () => {
     try {
@@ -99,6 +101,7 @@ const useStore = create((set, get) => ({
   readerMode: false,
   readerFile: null,
   readerContent: '',
+  readerHighlights: [],
   readerTheme: localStorage.getItem('readerTheme') || 'dark',
   readerFontSize: parseInt(localStorage.getItem('readerFontSize') || '18', 10),
 
@@ -114,6 +117,7 @@ const useStore = create((set, get) => ({
         readerMode: true,
         readerFile: filePath,
         readerContent: data.content,
+        readerHighlights: data.highlights || [],
         readerScrollPercent: progress?.scrollPercent || 0,
       });
     } catch (err) {
@@ -149,6 +153,22 @@ const useStore = create((set, get) => ({
     } catch (err) {
       console.error('Failed to load continue reading:', err);
     }
+  },
+
+  addHighlight: async (filePath, highlight, isReader) => {
+    const key = isReader ? 'readerHighlights' : 'currentHighlights';
+    const current = get()[key];
+    const updated = [...current, highlight];
+    set({ [key]: updated });
+    await api.saveHighlights(filePath, updated);
+  },
+
+  removeHighlight: async (filePath, highlightId, isReader) => {
+    const key = isReader ? 'readerHighlights' : 'currentHighlights';
+    const current = get()[key];
+    const updated = current.filter((h) => h.id !== highlightId);
+    set({ [key]: updated });
+    await api.saveHighlights(filePath, updated);
   },
 
   // Actions
