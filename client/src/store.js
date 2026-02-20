@@ -206,6 +206,72 @@ const useStore = create((set, get) => ({
     await api.uploadFiles(files, folder);
     await get().loadTree();
   },
+
+  // Chat / RAG
+  chatMessages: [],
+  chatLoading: false,
+  indexStatus: null,
+  indexing: false,
+
+  sendChatMessage: async (question) => {
+    const { chatMessages } = get();
+    set({
+      chatMessages: [...chatMessages, { role: 'user', content: question }],
+      chatLoading: true,
+    });
+    try {
+      const result = await api.chatWithVault(question);
+      set((s) => ({
+        chatMessages: [
+          ...s.chatMessages,
+          { role: 'assistant', content: result.answer, sources: result.sources },
+        ],
+        chatLoading: false,
+      }));
+    } catch (err) {
+      set((s) => ({
+        chatMessages: [
+          ...s.chatMessages,
+          { role: 'assistant', content: `Error: ${err.message}` },
+        ],
+        chatLoading: false,
+      }));
+    }
+  },
+
+  clearChat: () => set({ chatMessages: [] }),
+
+  loadIndexStatus: async () => {
+    try {
+      const status = await api.getIndexStatus();
+      set({ indexStatus: status });
+    } catch (err) {
+      console.error('Failed to load index status:', err);
+    }
+  },
+
+  startIndexing: async () => {
+    set({ indexing: true });
+    try {
+      let remaining = 1;
+      while (remaining > 0) {
+        const result = await api.indexVault(2);
+        remaining = result.remaining;
+        set({
+          indexStatus: {
+            totalFiles: result.totalFiles,
+            indexedFiles: result.totalFiles - result.remaining,
+            totalChunks: (get().indexStatus?.totalChunks || 0) + result.totalChunks,
+          },
+        });
+      }
+      await get().loadIndexStatus();
+    } catch (err) {
+      console.error('Indexing failed:', err);
+    } finally {
+      set({ indexing: false });
+    }
+  },
 }));
 
 export default useStore;

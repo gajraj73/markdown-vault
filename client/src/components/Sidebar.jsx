@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import useStore from '../store';
 import FolderTree from './FolderTree';
-import { FolderTree as FolderIcon, Star, Clock, Tag, ChevronRight, BookOpen } from 'lucide-react';
+import ChatPanel from './ChatPanel';
+import { FolderTree as FolderIcon, Star, Clock, Tag, ChevronRight, BookOpen, MessageCircle } from 'lucide-react';
 
 export default function Sidebar() {
   const { sidebarTab, setSidebarTab, metadata, tree, openFile, currentFile, continueReading, openReader } = useStore();
@@ -12,24 +13,24 @@ export default function Sidebar() {
     { id: 'favorites', icon: Star, label: 'Starred' },
     { id: 'recent', icon: Clock, label: 'Recent' },
     { id: 'tags', icon: Tag, label: 'Tags' },
+    { id: 'chat', icon: MessageCircle, label: 'Chat' },
   ];
 
   return (
     <div className="w-64 border-r border-gray-200 dark:border-gray-700 flex flex-col bg-gray-50 dark:bg-gray-900 shrink-0">
-      <div className="flex border-b border-gray-200 dark:border-gray-700">
+      <div className="flex border-b border-gray-200 dark:border-gray-700 overflow-hidden">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setSidebarTab(tab.id)}
-            className={`flex-1 p-2 text-xs flex flex-col items-center gap-1 transition-colors ${
+            className={`flex-1 p-2.5 flex items-center justify-center transition-colors ${
               sidebarTab === tab.id
                 ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
                 : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
             title={tab.label}
           >
-            <tab.icon size={16} />
-            <span>{tab.label}</span>
+            <tab.icon size={18} />
           </button>
         ))}
       </div>
@@ -56,6 +57,7 @@ export default function Sidebar() {
           />
         )}
         {sidebarTab === 'tags' && <TagsView />}
+        {sidebarTab === 'chat' && <ChatPanel />}
       </div>
     </div>
   );

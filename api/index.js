@@ -35,6 +35,8 @@ app.use(async (req, res, next) => {
 
 // Mount routes
 const fileRoutes = require('../server/routes/files');
+const ragRoutes = require('../server/routes/rag');
 app.use('/api', fileRoutes);
+app.use('/api', ragRoutes);
 
 module.exports = app;

@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const connectDB = require('./db');
 const fileRoutes = require('./routes/files');
+const ragRoutes = require('./routes/rag');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -12,6 +13,7 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
 app.use('/api', fileRoutes);
+app.use('/api', ragRoutes);
 
 // Serve client build in production
 if (process.env.NODE_ENV === 'production') {

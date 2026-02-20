@@ -75,6 +75,21 @@ export const saveHighlights = (path, highlights) =>
 
 export const getContinueReading = () => request('/metadata/continue-reading');
 
+// RAG / Chat
+export const indexVault = (batchSize = 5) =>
+  request('/rag/index', {
+    method: 'POST',
+    body: JSON.stringify({ batchSize }),
+  });
+
+export const chatWithVault = (question) =>
+  request('/rag/chat', {
+    method: 'POST',
+    body: JSON.stringify({ question }),
+  });
+
+export const getIndexStatus = () => request('/rag/status');
+
 export async function uploadFiles(files, folder = '') {
   const formData = new FormData();
   for (const file of files) {
