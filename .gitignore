@@ -4,3 +4,4 @@ dist/
 vault/.metadata.json
 *.log
 .env
+.vercel

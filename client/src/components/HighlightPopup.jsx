@@ -1,7 +1,7 @@
 import { HIGHLIGHT_COLORS } from '../utils/highlights';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Workflow, Loader2 } from 'lucide-react';
 
-export default function HighlightPopup({ position, mode, onSelectColor, onRemove, onClose }) {
+export default function HighlightPopup({ position, mode, onSelectColor, onRemove, onClose, onGenerateDiagram, diagramLoading }) {
   if (!position) return null;
 
   return (
@@ -19,18 +19,36 @@ export default function HighlightPopup({ position, mode, onSelectColor, onRemove
         }}
       >
         {mode === 'add' ? (
-          HIGHLIGHT_COLORS.map((c) => (
-            <button
-              key={c.name}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelectColor(c.bg);
-              }}
-              className="w-7 h-7 rounded-full border-2 border-gray-600 hover:scale-125 hover:border-white transition-all"
-              style={{ backgroundColor: c.dot }}
-              title={c.name}
-            />
-          ))
+          <>
+            {HIGHLIGHT_COLORS.map((c) => (
+              <button
+                key={c.name}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelectColor(c.bg);
+                }}
+                className="w-7 h-7 rounded-full border-2 border-gray-600 hover:scale-125 hover:border-white transition-all"
+                style={{ backgroundColor: c.dot }}
+                title={c.name}
+              />
+            ))}
+            {onGenerateDiagram && (
+              <>
+                <div className="w-px h-5 bg-gray-600 mx-0.5" />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onGenerateDiagram();
+                  }}
+                  disabled={diagramLoading}
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-blue-400 hover:text-blue-300 hover:scale-125 transition-all disabled:opacity-50"
+                  title="Generate diagram from selection"
+                >
+                  {diagramLoading ? <Loader2 size={16} className="animate-spin" /> : <Workflow size={16} />}
+                </button>
+              </>
+            )}
+          </>
         ) : (
           <button
             onClick={(e) => {

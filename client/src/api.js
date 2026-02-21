@@ -90,6 +90,13 @@ export const chatWithVault = (question) =>
 
 export const getIndexStatus = () => request('/rag/status');
 
+// Diagram
+export const generateDiagram = (text) =>
+  request('/diagram/generate', {
+    method: 'POST',
+    body: JSON.stringify({ text }),
+  });
+
 // Voice
 export const structureVoiceNote = (transcript) =>
   request('/voice/structure', {

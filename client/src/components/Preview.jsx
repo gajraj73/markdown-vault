@@ -1,15 +1,21 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import useStore from '../store';
 import HighlightPopup from './HighlightPopup';
 import { applyHighlightsToDOM, getSelectionInfo } from '../utils/highlights';
+import { getMarkdownComponents } from '../utils/markdownComponents';
+import { insertAfterParagraph } from '../utils/insertDiagram';
+import * as api from '../api';
 
 export default function Preview() {
-  const { content, currentFile, currentHighlights, addHighlight, removeHighlight } = useStore();
+  const { content, currentFile, currentHighlights, addHighlight, removeHighlight, darkMode, setContent } = useStore();
   const contentRef = useRef(null);
   const [popup, setPopup] = useState(null);
+  const [diagramLoading, setDiagramLoading] = useState(false);
+
+  const markdownComponents = useMemo(() => getMarkdownComponents(darkMode), [darkMode]);
 
   // Apply highlights after render
   useEffect(() => {
@@ -61,6 +67,24 @@ export default function Preview() {
     setPopup(null);
   }, [popup, currentFile, removeHighlight]);
 
+  const handleGenerateDiagram = useCallback(async () => {
+    if (!popup || !currentFile) return;
+    setDiagramLoading(true);
+    try {
+      const result = await api.generateDiagram(popup.text);
+      const newContent = insertAfterParagraph(content, popup.text, popup.occurrenceIndex, result.mermaid);
+      setContent(newContent);
+      await api.saveFile(currentFile, newContent);
+      useStore.setState({ dirty: false });
+      window.getSelection()?.removeAllRanges();
+      setPopup(null);
+    } catch (err) {
+      console.error('Diagram generation failed:', err);
+    } finally {
+      setDiagramLoading(false);
+    }
+  }, [popup, content, currentFile, setContent]);
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="px-3 py-1.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs text-gray-500">
@@ -76,6 +100,7 @@ export default function Preview() {
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeHighlight]}
+            components={markdownComponents}
           >
             {content}
           </ReactMarkdown>
@@ -87,6 +112,8 @@ export default function Preview() {
         onSelectColor={handleColorSelect}
         onRemove={handleRemove}
         onClose={() => setPopup(null)}
+        onGenerateDiagram={handleGenerateDiagram}
+        diagramLoading={diagramLoading}
       />
     </div>
   );

@@ -1,10 +1,11 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import useStore from '../store';
 import HighlightPopup from './HighlightPopup';
 import { applyHighlightsToDOM, getSelectionInfo } from '../utils/highlights';
+import { getMarkdownComponents } from '../utils/markdownComponents';
 import {
   X,
   Minus,
@@ -71,6 +72,8 @@ export default function Reader() {
   const [popup, setPopup] = useState(null);
 
   const theme = THEMES[readerTheme] || THEMES.dark;
+  const isDark = readerTheme === 'dark';
+  const markdownComponents = useMemo(() => getMarkdownComponents(isDark), [isDark]);
   const fileName = readerFile?.split('/').pop()?.replace(/\.md$/, '') || '';
 
   // Apply highlights after content renders
@@ -295,6 +298,7 @@ export default function Reader() {
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeHighlight]}
+              components={markdownComponents}
             >
               {readerContent}
             </ReactMarkdown>

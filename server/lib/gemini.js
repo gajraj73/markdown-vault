@@ -103,4 +103,31 @@ ${transcript}`;
   return { title, content };
 }
 
-module.exports = { embedTexts, generateAnswer, structureTranscript };
+async function generateDiagram(text) {
+  const prompt = `You are a diagram expert. Convert the following text into a Mermaid.js diagram.
+
+Rules:
+- Pick the BEST diagram type automatically (flowchart, sequenceDiagram, stateDiagram-v2, mindmap, pie, etc.)
+- Use flowchart LR by default unless another type is clearly better
+- Keep it clean and readable — don't overcomplicate
+- Put all node labels and edge labels in double quotes
+- Do NOT use emojis
+- Return ONLY the Mermaid code, no explanation, no markdown fences
+
+Text:
+${text}`;
+
+  const response = await withRetry(() =>
+    getAI().models.generateContent({
+      model: 'gemini-2.5-flash-lite',
+      contents: prompt,
+    })
+  );
+
+  // Strip accidental markdown fences if present
+  let mermaid = response.text.trim();
+  mermaid = mermaid.replace(/^```(?:mermaid)?\n?/i, '').replace(/\n?```$/i, '').trim();
+  return mermaid;
+}
+
+module.exports = { embedTexts, generateAnswer, structureTranscript, generateDiagram };
