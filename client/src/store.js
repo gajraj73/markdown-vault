@@ -250,6 +250,32 @@ const useStore = create((set, get) => ({
     }
   },
 
+  // Voice Note
+  voiceNoteOpen: false,
+  voiceNoteLoading: false,
+  voiceNoteResult: null,
+
+  openVoiceNote: () => set({ voiceNoteOpen: true }),
+  closeVoiceNote: () => set({ voiceNoteOpen: false, voiceNoteResult: null, voiceNoteLoading: false }),
+
+  structureVoiceNote: async (transcript) => {
+    set({ voiceNoteLoading: true });
+    try {
+      const result = await api.structureVoiceNote(transcript);
+      set({ voiceNoteResult: result, voiceNoteLoading: false });
+    } catch (err) {
+      set({ voiceNoteLoading: false });
+      throw err;
+    }
+  },
+
+  saveVoiceNote: async (filePath, content) => {
+    await api.saveFile(filePath, content);
+    await get().loadTree();
+    await get().openFile(filePath);
+    set({ voiceNoteOpen: false, voiceNoteResult: null });
+  },
+
   startIndexing: async () => {
     set({ indexing: true });
     try {

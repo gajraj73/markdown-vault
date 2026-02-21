@@ -6,9 +6,10 @@ import Preview from './components/Preview';
 import TopBar from './components/TopBar';
 import SearchModal from './components/SearchModal';
 import Reader from './components/Reader';
+import VoiceNoteModal from './components/VoiceNoteModal';
 
 export default function App() {
-  const { darkMode, loadTree, loadMetadata, loadContinueReading, showEditor, currentFile, searchOpen, uploadFiles, readerMode } = useStore();
+  const { darkMode, loadTree, loadMetadata, loadContinueReading, showEditor, currentFile, searchOpen, uploadFiles, readerMode, voiceNoteOpen } = useStore();
   const [dropping, setDropping] = useState(false);
 
   useEffect(() => {
@@ -95,6 +96,7 @@ export default function App() {
       </div>
       {searchOpen && <SearchModal />}
       {readerMode && <Reader />}
+      {voiceNoteOpen && <VoiceNoteModal />}
 
       {dropping && (
         <div className="fixed inset-0 bg-blue-500/10 z-40 pointer-events-none flex items-center justify-center">

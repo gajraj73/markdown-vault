@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import useStore from '../store';
-import { Search, Plus, Upload, Moon, Sun, Pencil, PencilOff, Star, Tag, BookOpen } from 'lucide-react';
+import { Search, Plus, Upload, Moon, Sun, Pencil, PencilOff, Star, Tag, BookOpen, Mic } from 'lucide-react';
 
 export default function TopBar() {
   const {
@@ -17,6 +17,7 @@ export default function TopBar() {
     currentTags,
     setTags,
     openReader,
+    openVoiceNote,
   } = useStore();
 
   const fileInputRef = useRef(null);
@@ -115,6 +116,14 @@ export default function TopBar() {
             onChange={handleUpload}
             className="hidden"
           />
+
+          <button
+            onClick={openVoiceNote}
+            className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            title="Voice brain dump"
+          >
+            <Mic size={18} />
+          </button>
 
           {currentFile && (
             <button

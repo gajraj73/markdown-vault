@@ -72,4 +72,35 @@ Answer concisely. Reference which source files are relevant.`;
   return response.text;
 }
 
-module.exports = { embedTexts, generateAnswer };
+async function structureTranscript(transcript) {
+  const prompt = `You are a note-taking assistant. The user spoke the following brain dump aloud. Convert it into a well-structured markdown note.
+
+Rules:
+- Add a clear, descriptive title as an H1 heading
+- Organize content with appropriate H2/H3 headings
+- Use bullet points and numbered lists where appropriate
+- Fix grammar and remove filler words (um, uh, like, you know)
+- Keep the user's meaning and tone intact
+- Do NOT add information the user didn't say
+- Return ONLY the markdown, no explanation
+
+Raw transcript:
+${transcript}`;
+
+  const response = await withRetry(() =>
+    getAI().models.generateContent({
+      model: 'gemini-2.5-flash-lite',
+      contents: prompt,
+    })
+  );
+
+  const content = response.text;
+  const titleMatch = content.match(/^#\s+(.+)$/m);
+  const title = titleMatch
+    ? titleMatch[1].trim()
+    : transcript.slice(0, 50).replace(/[^a-zA-Z0-9\s]/g, '').trim();
+
+  return { title, content };
+}
+
+module.exports = { embedTexts, generateAnswer, structureTranscript };

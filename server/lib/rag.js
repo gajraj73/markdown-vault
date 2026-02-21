@@ -107,4 +107,30 @@ async function getIndexStatus() {
   };
 }
 
-module.exports = { indexVault, queryVault, getIndexStatus };
+async function findRelatedNotes(text) {
+  const allChunks = await Embedding.find({}, 'filePath embedding').lean();
+  if (allChunks.length === 0) return [];
+
+  const [textEmbedding] = await embedTexts([text]);
+
+  const scored = allChunks.map(chunk => ({
+    filePath: chunk.filePath,
+    score: cosineSimilarity(textEmbedding, chunk.embedding),
+  }));
+
+  const fileMap = new Map();
+  for (const item of scored) {
+    const existing = fileMap.get(item.filePath);
+    if (!existing || item.score > existing.score) {
+      fileMap.set(item.filePath, item);
+    }
+  }
+
+  return Array.from(fileMap.values())
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .filter(item => item.score > 0.3)
+    .map(item => ({ filePath: item.filePath, score: Math.round(item.score * 100) / 100 }));
+}
+
+module.exports = { indexVault, queryVault, getIndexStatus, findRelatedNotes };

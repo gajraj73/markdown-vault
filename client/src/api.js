@@ -90,6 +90,13 @@ export const chatWithVault = (question) =>
 
 export const getIndexStatus = () => request('/rag/status');
 
+// Voice
+export const structureVoiceNote = (transcript) =>
+  request('/voice/structure', {
+    method: 'POST',
+    body: JSON.stringify({ transcript }),
+  });
+
 export async function uploadFiles(files, folder = '') {
   const formData = new FormData();
   for (const file of files) {
